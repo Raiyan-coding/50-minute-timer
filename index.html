@@ -23,8 +23,6 @@
       margin: 0;
       padding: 0;
     }
-
-
     
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -151,16 +149,16 @@
   </div>
   <div class="countdown" id="countdown">50:00</div>
   <div class="buttons" id="button-container">
-    <button onclick="pauseTimer()">Pause</button>
-    <button onclick="resumeTimer()">Resume</button>
-    <button onclick="restartTimer()">Restart</button>
-    <button onclick="adjustTime(5)">+5 Min</button>
-    <button onclick="adjustTime(1)">+1 Min</button>
-    <button onclick="adjustTime(-1)">-1 Min</button>
-    <button onclick="adjustTime(-5)">-5 Min</button>
-    <button onclick="adjustTime(-10, 'sec')">-10 Sec</button>
-    <button onclick="stopBeepSound()">Stop Sound</button>
-    <button onclick="toggleHistory()">History</button>
+    <button onclick="pauseTimer()">Pause (P)</button>
+    <button onclick="resumeTimer()">Resume (R)</button>
+    <button onclick="restartTimer()">Restart (T)</button>
+    <button onclick="adjustTime(5)">+5 Min (F)</button>
+    <button onclick="adjustTime(1)">+1 Min (I)</button>
+    <button onclick="adjustTime(-1)">-1 Min (D)</button>
+    <button onclick="adjustTime(-5)">-5 Min (L)</button>
+    <button onclick="adjustTime(-10, 'sec')">-10 Sec (X)</button>
+    <button onclick="stopBeepSound()">Stop Sound (S)</button>
+    <button onclick="toggleHistory()">History (H)</button>
   </div>
   <div id="last-update">
     Last updated: <span id="update-time"></span>
@@ -168,22 +166,10 @@
   <div id="study-time">Today's Study Time: 0 min 0 sec</div>
   <div id="history-container"></div>
   <div class="footer">
-    &copy; 2025 Md Raiyan Islam | Dark Theme Enhanced
-    <div id="youtube-icon" onclick="openYouTube()">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" alt="YouTube" width="100">
-    </div>
+    &copy; 2025 MK Shaon | Dark Theme Enhanced
   </div>
 
-
-
-
   <script>
-
-
-function openYouTube() {
-      window.open("https://www.youtube.com/@justenjoystudio7447", "_blank");
-  }
-
     // Timer variables
     let totalTime = 50 * 60; // 50 minutes in seconds
     let timerInterval;
@@ -326,6 +312,43 @@ function openYouTube() {
         container.style.display = "none";
       }
     }
+
+    // Keyboard shortcuts for each button action
+    document.addEventListener("keydown", function(e) {
+      const key = e.key.toUpperCase();
+      switch (key) {
+        case "P":
+          pauseTimer();
+          break;
+        case "R":
+          resumeTimer();
+          break;
+        case "T":
+          restartTimer();
+          break;
+        case "F":
+          adjustTime(5);
+          break;
+        case "I":
+          adjustTime(1);
+          break;
+        case "D":
+          adjustTime(-1);
+          break;
+        case "L":
+          adjustTime(-5);
+          break;
+        case "X":
+          adjustTime(-10, "sec");
+          break;
+        case "S":
+          stopBeepSound();
+          break;
+        case "H":
+          toggleHistory();
+          break;
+      }
+    });
 
     // Start the timer when the page loads
     window.onload = startTimer;
