@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>50-Minute Countdown Timer</title>
+  <style>
+    /* CSS Variables for Dark Theme */
+    :root {
+      --primary-color: #ff8921;
+      --secondary-color: #222;
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --accent-color: #ff9a3e;
+      --stroke-color: #000000;
+      --btn-bg: var(--primary-color);
+      --btn-hover: var(--accent-color);
+    }
+    
+    /* Reset and base styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-color);
+      color: var(--primary-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 100vh;
+      transition: background 0.5s, color 0.5s;
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-top: 10px;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      text-shadow: 0px 0px 8px var(--stroke-color);
+    }
+    
+    .countdown {
+      font-size: 4rem;
+      font-weight: bold;
+      margin-top: 40px;
+      text-align: center;
+      color: var(--primary-color);
+      -webkit-text-stroke: 1px var(--stroke-color);
+      text-shadow: 0px 0px 10px var(--stroke-color);
+      transition: color 0.5s, text-shadow 0.5s;
+    }
+    
+    .blink {
+      animation: blink-animation 1s steps(2, start) infinite;
+    }
+    
+    @keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
+    }
+    
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    button {
+      background: var(--btn-bg);
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: var(--text-color);
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+      transition: background 0.3s, transform 0.3s;
+    }
+    
+    button:hover {
+      background: var(--btn-hover);
+      transform: translateY(-2px);
+    }
+    
+    #last-update, #study-time {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    
+    #study-time {
+      margin-top: 10px;
+    }
+    
+    #history-container {
+      background: var(--secondary-color);
+      color: var(--text-color);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 400px;
+      margin: 20px;
+      display: none;
+    }
+    
+    .footer {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      text-align: center;
+      color: var(--primary-color);
+    }
+    
+    /* Responsive Design */
+    @media (min-width: 768px) {
+      .countdown {
+        font-size: 5rem;
+      }
+      
+      button {
+        font-size: 1.1rem;
+        padding: 12px 24px;
+      }
+      
+      .header h1 {
+        font-size: 3rem;
+      }
+    }
+    
+    /* Additional Visual Enhancements */
+    .finished {
+      text-shadow: 0px 0px 20px var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>50-Minute Countdown Timer</h1>
+  </div>
+  <div class="countdown" id="countdown">50:00</div>
+  <div class="buttons" id="button-container">
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resumeTimer()">Resume</button>
+    <button onclick="restartTimer()">Restart</button>
+    <button onclick="adjustTime(5)">+5 Min</button>
+    <button onclick="adjustTime(1)">+1 Min</button>
+    <button onclick="adjustTime(-1)">-1 Min</button>
+    <button onclick="adjustTime(-5)">-5 Min</button>
+    <button onclick="adjustTime(-10, 'sec')">-10 Sec</button>
+    <button onclick="stopBeepSound()">Stop Sound</button>
+    <button onclick="toggleHistory()">History</button>
+  </div>
+  <div id="last-update">
+    Last updated: <span id="update-time"></span>
+  </div>
+  <div id="study-time">Today's Study Time: 0 min 0 sec</div>
+  <div id="history-container"></div>
+  <div class="footer">
+    &copy; 2025 Md Raiyan Islam | Dark Theme Enhanced
+    <div id="youtube-icon" onclick="openYouTube()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" alt="YouTube" width="100">
+    </div>
+  </div>
+
+
+
+
+  <script>
+
+
+function openYouTube() {
+      window.open("https://www.youtube.com/@justenjoystudio7447", "_blank");
+  }
+
+    // Timer variables
+    let totalTime = 50 * 60; // 50 minutes in seconds
+    let timerInterval;
+    let isPaused = false;
+    let beepInterval;
+    let audioCtx;
+    let oscillator;
+
+    // Utility: Get today's date in YYYY-MM-DD format
+    function getTodayDate() {
+      const today = new Date();
+      return today.toISOString().split("T")[0];
+    }
+
+    // Update countdown display
+    function updateCountdownDisplay() {
+      const minutes = Math.floor(totalTime / 60);
+      const seconds = totalTime % 60;
+      document.getElementById('countdown').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // Update the "last updated" time display
+    function updateLastUpdateTime() {
+      const now = new Date();
+      document.getElementById('update-time').textContent = now.toLocaleString();
+    }
+
+    // Update study time in localStorage and update the UI to show minutes and seconds
+    function updateStudyTime(secondsToAdd) {
+      const today = getTodayDate();
+      let studyData = JSON.parse(localStorage.getItem("studyData") || "{}");
+      if (!studyData[today]) {
+        studyData[today] = 0;
+      }
+      studyData[today] += secondsToAdd;
+      localStorage.setItem("studyData", JSON.stringify(studyData));
+      
+      const totalSeconds = studyData[today];
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      document.getElementById("study-time").textContent = `Today's Study Time: ${minutes} min ${seconds} sec`;
+    }
+
+    // Start the countdown timer
+    function startTimer() {
+      updateLastUpdateTime();
+      // Ensure today's study data is initialized
+      updateStudyTime(0);
+      timerInterval = setInterval(() => {
+        if (!isPaused && totalTime > 0) {
+          totalTime--;
+          updateCountdownDisplay();
+          // Accumulate study time only when actively counting down
+          updateStudyTime(1);
+        }
+        if (totalTime === 0) {
+          clearInterval(timerInterval);
+          document.getElementById('countdown').textContent = "Take a break!";
+          document.getElementById('countdown').classList.add('blink', 'finished');
+          startBeepSound();
+        }
+      }, 1000);
+    }
+
+    // Pause the timer
+    function pauseTimer() {
+      isPaused = true;
+      updateLastUpdateTime();
+    }
+
+    // Resume the timer
+    function resumeTimer() {
+      isPaused = false;
+      updateLastUpdateTime();
+    }
+
+    // Restart the timer
+    function restartTimer() {
+      totalTime = 50 * 60; // Reset to 50 minutes
+      isPaused = false;
+      document.getElementById('countdown').classList.remove('blink', 'finished');
+      updateCountdownDisplay();
+      updateLastUpdateTime();
+      clearInterval(timerInterval);
+      clearInterval(beepInterval);
+      startTimer();
+    }
+
+    // Adjust the time (in minutes by default, seconds if unit is 'sec')
+    function adjustTime(amount, unit = 'min') {
+      if (unit === 'sec') {
+        totalTime += amount;
+      } else {
+        totalTime += amount * 60;
+      }
+      if (totalTime < 0) totalTime = 0;
+      updateCountdownDisplay();
+      updateLastUpdateTime();
+    }
+
+    // Start continuous beep sound when the timer finishes
+    function startBeepSound() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function playBeep() {
+        oscillator = audioCtx.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+        oscillator.connect(audioCtx.destination);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+      }
+      beepInterval = setInterval(playBeep, 1000);
+    }
+
+    // Stop the beep sound
+    function stopBeepSound() {
+      clearInterval(beepInterval);
+      if (oscillator) oscillator.disconnect();
+    }
+
+    // Toggle the display of study history (data from previous days)
+    function toggleHistory() {
+      const container = document.getElementById("history-container");
+      if (container.style.display === "none" || container.style.display === "") {
+        const today = getTodayDate();
+        let studyData = JSON.parse(localStorage.getItem("studyData") || "{}");
+        let historyHTML = "<h3>Study History</h3><ul>";
+        for (let date in studyData) {
+          if (date !== today) {
+            historyHTML += `<li>${date}: ${Math.floor(studyData[date] / 60)} min ${studyData[date] % 60} sec</li>`;
+          }
+        }
+        historyHTML += "</ul>";
+        if (historyHTML === "<h3>Study History</h3><ul></ul>") {
+          historyHTML = "<p>No history available.</p>";
+        }
+        container.innerHTML = historyHTML;
+        container.style.display = "block";
+      } else {
+        container.style.display = "none";
+      }
+    }
+
+    // Start the timer when the page loads
+    window.onload = startTimer;
+
+    /* 
+      Further Improvement Ideas:
+      - Add a theme toggle button to switch between dark and light modes using CSS variables.
+      - Include sound controls (volume slider, different beep sounds) for a personalized experience.
+      - Automatically detect day change (e.g., at midnight) and refresh today's study time.
+      - Enhance accessibility with ARIA attributes and keyboard navigation.
+    */
+  </script>
+</body>
+</html>
